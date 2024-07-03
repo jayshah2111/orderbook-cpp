@@ -89,3 +89,8 @@ void Orderbook::CancelOrderInternal(OrderId orderId)
 
 	OnOrderCancelled(order);
 }
+
+void Orderbook::OnOrderCancelled(OrderPointer order)
+{
+	UpdateLevelData(order->GetPrice(), order->GetRemainingQuantity(), LevelData::Action::Remove);
+}
