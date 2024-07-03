@@ -53,3 +53,11 @@ void Orderbook::PruneGoodForDayOrders()
 		CancelOrders(orderIds);
 	}
 }
+
+void Orderbook::CancelOrders(OrderIds orderIds)
+{
+	std::scoped_lock ordersLock{ ordersMutex_ };
+
+	for (const auto& orderId : orderIds)
+		CancelOrderInternal(orderId);
+}
