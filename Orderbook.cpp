@@ -61,3 +61,13 @@ void Orderbook::CancelOrders(OrderIds orderIds)
 	for (const auto& orderId : orderIds)
 		CancelOrderInternal(orderId);
 }
+
+void Orderbook::CancelOrderInternal(OrderId orderId)
+{
+	if (!orders_.contains(orderId))
+		return;
+
+	const auto [order, iterator] = orders_.at(orderId);
+	orders_.erase(orderId);
+
+}
