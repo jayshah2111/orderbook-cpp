@@ -56,4 +56,20 @@ private:
     bool CanFullyFill(Side side, Price price, Quantity quantity) const;
     bool CanMatch(Side side, Price price) const;
     Trades MatchOrders();
+
+public:
+
+    Orderbook();
+    Orderbook(const Orderbook&) = delete;
+    void operator=(const Orderbook&) = delete;
+    Orderbook(Orderbook&&) = delete;
+    void operator=(Orderbook&&) = delete;
+    ~Orderbook();
+
+    Trades AddOrder(OrderPointer order);
+    void CancelOrder(OrderId orderId);
+    Trades ModifyOrder(OrderModify order);
+
+    std::size_t Size() const;
+    OrderbookLevelInfos GetOrderInfos() const;
 };
