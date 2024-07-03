@@ -20,4 +20,17 @@ private:
         OrderPointer order_{ nullptr };
         OrderPointers::iterator location_;
     };
+
+    struct LevelData
+    {
+        Quantity quantity_{ };
+        Quantity count_{ };
+
+        enum class Action
+        {
+            Add,
+            Remove,
+            Match,
+        };
+    };
 };
