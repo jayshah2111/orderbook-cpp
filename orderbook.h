@@ -42,4 +42,13 @@ private:
     std::thread ordersPruneThread_;
     std::condition_variable shutdownConditionVariable_;
     std::atomic<bool> shutdown_{ false };
+
+    void PruneGoodForDayOrders();
+
+    void CancelOrders(OrderIds orderIds);
+    void CancelOrderInternal(OrderId orderId);
+
+    void OnOrderCancelled(OrderPointer order);
+    void OnOrderAdded(OrderPointer order);
+
 };
