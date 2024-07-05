@@ -351,3 +351,18 @@ std::size_t Orderbook::Size() const
 	std::scoped_lock ordersLock{ ordersMutex_ };
 	return orders_.size(); 
 }
+
+OrderbookLevelInfos Orderbook::GetOrderInfos() const
+{
+	LevelInfos bidInfos, askInfos;
+	bidInfos.reserve(orders_.size());
+	askInfos.reserve(orders_.size());
+
+	auto CreateLevelInfos = [](Price price, const OrderPointers& orders)
+	{
+		return LevelInfo{ price, std::accumulate(orders.begin(), orders.end(), (Quantity)0,
+			[](Quantity runningSum, const OrderPointer& order)
+			{ return runningSum + order->GetRemainingQuantity(); }) };
+	};
+
+}
