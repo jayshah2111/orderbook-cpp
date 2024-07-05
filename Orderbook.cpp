@@ -327,3 +327,18 @@ void Orderbook::CancelOrder(OrderId orderId)
 
 	CancelOrderInternal(orderId);
 }
+
+Trades Orderbook::ModifyOrder(OrderModify order)
+{
+	OrderType orderType;
+
+	{
+		std::scoped_lock ordersLock{ ordersMutex_ };
+
+		const auto& [existingOrder, _] = orders_.at(order.GetOrderId());
+		orderType = existingOrder->GetOrderType();
+	}
+
+	CancelOrder(order.GetOrderId());
+	return AddOrder(order.ToOrderPointer(orderType));
+}
