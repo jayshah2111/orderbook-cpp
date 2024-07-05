@@ -118,4 +118,6 @@ void Orderbook::UpdateLevelData(Price price, Quantity quantity, LevelData::Actio
 	{
 		data.quantity_ += quantity;
 	}
+	if (data.count_ == 0)
+		data_.erase(price);
 }
