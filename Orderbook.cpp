@@ -99,3 +99,9 @@ void Orderbook::OnOrderAdded(OrderPointer order)
 {
 	UpdateLevelData(order->GetPrice(), order->GetInitialQuantity(), LevelData::Action::Add);
 }
+
+void Orderbook::OnOrderMatched(Price price, Quantity quantity, bool isFullyFilled)
+{
+	UpdateLevelData(price, quantity, isFullyFilled ? LevelData::Action::Remove : LevelData::Action::Match);
+}
+
