@@ -140,5 +140,22 @@ bool Orderbook::CanFullyFill(Side side, Price price, Quantity quantity) const
 		threshold = bidPrice;
 	}
 
+	for (const auto& [levelPrice, levelData] : data_)
+	{
+		if (threshold.has_value() &&
+			(side == Side::Buy && threshold.value() > levelPrice) ||
+			(side == Side::Sell && threshold.value() < levelPrice))
+			continue;
+
+		if ((side == Side::Buy && levelPrice > price) ||
+			(side == Side::Sell && levelPrice < price))
+			continue;
+
+		if (quantity <= levelData.quantity_)
+			return true;
+
+		quantity -= levelData.quantity_;
+	}
+
 	return false;
 }
