@@ -121,3 +121,24 @@ void Orderbook::UpdateLevelData(Price price, Quantity quantity, LevelData::Actio
 	if (data.count_ == 0)
 		data_.erase(price);
 }
+
+bool Orderbook::CanFullyFill(Side side, Price price, Quantity quantity) const
+{
+	if (!CanMatch(side, price))
+		return false;
+
+	std::optional<Price> threshold;
+
+	if (side == Side::Buy)
+	{
+		const auto [askPrice, _] = *asks_.begin();
+		threshold = askPrice;
+	}
+	else
+	{
+		const auto [bidPrice, _] = *bids_.begin();
+		threshold = bidPrice;
+	}
+
+	return false;
+}
