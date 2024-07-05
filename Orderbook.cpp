@@ -365,4 +365,13 @@ OrderbookLevelInfos Orderbook::GetOrderInfos() const
 			{ return runningSum + order->GetRemainingQuantity(); }) };
 	};
 
+
+	for (const auto& [price, orders] : bids_)
+		bidInfos.push_back(CreateLevelInfos(price, orders));
+
+	for (const auto& [price, orders] : asks_)
+		askInfos.push_back(CreateLevelInfos(price, orders));
+
+	return OrderbookLevelInfos{ bidInfos, askInfos };
+
 }
