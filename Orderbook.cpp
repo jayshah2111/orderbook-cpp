@@ -345,3 +345,9 @@ Trades Orderbook::ModifyOrder(OrderModify order)
 	CancelOrder(order.GetOrderId());
 	return AddOrder(order.ToOrderPointer(orderType));
 }
+
+std::size_t Orderbook::Size() const
+{
+	std::scoped_lock ordersLock{ ordersMutex_ };
+	return orders_.size(); 
+}
