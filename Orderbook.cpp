@@ -335,6 +335,9 @@ Trades Orderbook::ModifyOrder(OrderModify order)
 	{
 		std::scoped_lock ordersLock{ ordersMutex_ };
 
+		if (!orders_.contains(order.GetOrderId()))
+			return { };
+
 		const auto& [existingOrder, _] = orders_.at(order.GetOrderId());
 		orderType = existingOrder->GetOrderType();
 	}
