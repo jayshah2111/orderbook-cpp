@@ -259,3 +259,12 @@ Trades Orderbook::MatchOrders()
 
 	return trades;
 }
+
+Orderbook::Orderbook() : ordersPruneThread_{ [this] { PruneGoodForDayOrders(); } } { }
+
+Orderbook::~Orderbook()
+{
+    shutdown_.store(true, std::memory_order_release);
+	shutdownConditionVariable_.notify_one();
+	ordersPruneThread_.join();
+}
