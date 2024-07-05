@@ -179,3 +179,67 @@ bool Orderbook::CanMatch(Side side, Price price) const
 		return price <= bestBid;
 	}
 }
+
+Trades Orderbook::MatchOrders()
+{
+	Trades trades;
+	trades.reserve(orders_.size());
+
+	while (true)
+	{
+		if (bids_.empty() || asks_.empty())
+			break;
+
+		auto& [bidPrice, bids] = *bids_.begin();
+		auto& [askPrice, asks] = *asks_.begin();
+
+		if (bidPrice < askPrice)
+			break;
+
+		while (!bids.empty() && !asks.empty())
+		{
+			auto bid = bids.front();
+			auto ask = asks.front();
+
+			Quantity quantity = std::min(bid->GetRemainingQuantity(), ask->GetRemainingQuantity());
+
+			bid->Fill(quantity);
+			ask->Fill(quantity);
+
+			if (bid->IsFilled())
+			{
+				bids.pop_front();
+				orders_.erase(bid->GetOrderId());
+			}
+
+			if (ask->IsFilled())
+			{
+				asks.pop_front();
+				orders_.erase(ask->GetOrderId());
+			}
+
+
+			trades.push_back(Trade{
+				TradeInfo{ bid->GetOrderId(), bid->GetPrice(), quantity },
+				TradeInfo{ ask->GetOrderId(), ask->GetPrice(), quantity } 
+				});
+
+			OnOrderMatched(bid->GetPrice(), quantity, bid->IsFilled());
+			OnOrderMatched(ask->GetPrice(), quantity, ask->IsFilled());
+		}
+
+        if (bids.empty())
+        {
+            bids_.erase(bidPrice);
+            data_.erase(bidPrice);
+        }
+
+        if (asks.empty())
+        {
+            asks_.erase(askPrice);
+            data_.erase(askPrice);
+        }
+	}
+
+	return trades;
+}
