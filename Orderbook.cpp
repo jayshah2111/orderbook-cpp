@@ -320,3 +320,10 @@ Trades Orderbook::AddOrder(OrderPointer order)
 	return MatchOrders();
 
 }
+
+void Orderbook::CancelOrder(OrderId orderId)
+{
+	std::scoped_lock ordersLock{ ordersMutex_ };
+
+	CancelOrderInternal(orderId);
+}
