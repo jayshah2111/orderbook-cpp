@@ -268,3 +268,55 @@ Orderbook::~Orderbook()
 	shutdownConditionVariable_.notify_one();
 	ordersPruneThread_.join();
 }
+
+Trades Orderbook::AddOrder(OrderPointer order)
+{
+	std::scoped_lock ordersLock{ ordersMutex_ };
+
+	if (orders_.contains(order->GetOrderId()))
+		return { };
+
+	if (order->GetOrderType() == OrderType::Market)
+	{
+		if (order->GetSide() == Side::Buy && !asks_.empty())
+		{
+			const auto& [worstAsk, _] = *asks_.rbegin();
+			order->ToGoodTillCancel(worstAsk);
+		}
+		else if (order->GetSide() == Side::Sell && !bids_.empty())
+		{
+			const auto& [worstBid, _] = *bids_.rbegin();
+			order->ToGoodTillCancel(worstBid);
+		}
+		else
+			return { };
+	}
+
+	if (order->GetOrderType() == OrderType::FillAndKill && !CanMatch(order->GetSide(), order->GetPrice()))
+		return { };
+
+	if (order->GetOrderType() == OrderType::FillOrKill && !CanFullyFill(order->GetSide(), order->GetPrice(), order->GetInitialQuantity()))
+		return { };
+
+	OrderPointers::iterator iterator;
+
+	if (order->GetSide() == Side::Buy)
+	{
+		auto& orders = bids_[order->GetPrice()];
+		orders.push_back(order);
+		iterator = std::prev(orders.end());
+	}
+	else
+	{
+		auto& orders = asks_[order->GetPrice()];
+		orders.push_back(order);
+		iterator = std::prev(orders.end());
+	}
+
+	orders_.insert({ order->GetOrderId(), OrderEntry{ order, iterator } });
+	
+	OnOrderAdded(order);
+	
+	return MatchOrders();
+
+}
