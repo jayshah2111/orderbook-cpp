@@ -105,3 +105,17 @@ void Orderbook::OnOrderMatched(Price price, Quantity quantity, bool isFullyFille
 	UpdateLevelData(price, quantity, isFullyFilled ? LevelData::Action::Remove : LevelData::Action::Match);
 }
 
+void Orderbook::UpdateLevelData(Price price, Quantity quantity, LevelData::Action action)
+{
+	auto& data = data_[price];
+
+	data.count_ += action == LevelData::Action::Remove ? -1 : action == LevelData::Action::Add ? 1 : 0;
+	if (action == LevelData::Action::Remove || action == LevelData::Action::Match)
+	{
+		data.quantity_ -= quantity;
+	}
+	else
+	{
+		data.quantity_ += quantity;
+	}
+}
