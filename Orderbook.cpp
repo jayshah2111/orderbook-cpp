@@ -159,3 +159,23 @@ bool Orderbook::CanFullyFill(Side side, Price price, Quantity quantity) const
 
 	return false;
 }
+
+bool Orderbook::CanMatch(Side side, Price price) const
+{
+	if (side == Side::Buy)
+	{
+		if (asks_.empty())
+			return false;
+
+		const auto& [bestAsk, _] = *asks_.begin();
+		return price >= bestAsk;
+	}
+	else
+	{
+		if (bids_.empty())
+			return false;
+
+		const auto& [bestBid, _] = *bids_.begin();
+		return price <= bestBid;
+	}
+}
