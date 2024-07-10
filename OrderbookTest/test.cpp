@@ -212,3 +212,65 @@ private:
 public:
     const static inline std::filesystem::path TestFolderPath{ Root / TestFolder };
 };
+
+TEST_P(OrderbookTestsFixture, OrderbookTestSuite)
+{
+    // Arrange
+    const auto file = OrderbookTestsFixture::TestFolderPath / GetParam();
+
+    InputHandler handler;
+    const auto [actions, result] = handler.GetInformations(file);
+
+    auto GetOrder = [](const Information& action)
+    {
+        return std::make_shared<Order>(
+            action.orderType_,
+            action.orderId_,
+            action.side_,
+            action.price_,
+            action.quantity_);
+    };
+
+    auto GetOrderModify = [](const Information& action)
+    {
+        return OrderModify
+        {
+            action.orderId_,
+            action.side_,
+            action.price_,
+            action.quantity_,
+        };
+    };
+
+    // Act
+    Orderbook orderbook;
+    for (const auto& action : actions)
+    {
+        switch (action.type_)
+        {
+        case ActionType::Add:
+        {
+            const Trades& trades = orderbook.AddOrder(GetOrder(action));
+        }
+        break;
+        case ActionType::Modify:
+        {
+            const Trades& trades = orderbook.ModifyOrder(GetOrderModify(action));
+        }
+        break;
+        case ActionType::Cancel:
+        {
+            orderbook.CancelOrder(action.orderId_);
+        }
+        break;
+        default:
+            throw std::logic_error("Unsupported Action.");
+        }
+    }
+
+    // Assert
+    const auto& orderbookInfos = orderbook.GetOrderInfos();
+    ASSERT_EQ(orderbook.Size(), result.allCount_);
+    ASSERT_EQ(orderbookInfos.GetBids().size(), result.bidCount_);
+    ASSERT_EQ(orderbookInfos.GetAsks().size(), result.askCount_);
+}
