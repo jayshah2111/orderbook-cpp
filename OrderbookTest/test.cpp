@@ -203,3 +203,12 @@ public:
         throw std::logic_error("No result specified.");
     }
 };
+
+class OrderbookTestsFixture : public googletest::TestWithParam<const char*> 
+{
+private:
+    const static inline std::filesystem::path Root{ std::filesystem::current_path() };
+    const static inline std::filesystem::path TestFolder{ "TestFiles" };
+public:
+    const static inline std::filesystem::path TestFolderPath{ Root / TestFolder };
+};
